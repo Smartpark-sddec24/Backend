@@ -1,0 +1,22 @@
+{
+  "name": "smartpark_backend",
+  "version": "1.0.0",
+  "description": "Smartpark Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Wacboss1/SmartPark_Backend.git"
+  },
+  "author": "William Clemmons",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Wacboss1/SmartPark_Backend/issues"
+  },
+  "homepage": "https://github.com/Wacboss1/SmartPark_Backend#readme",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
