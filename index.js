@@ -34,6 +34,13 @@ app.get('/getStatus', async (req, res) => {
     }
 })
 
+app.post('/updateSpot', async (req, res) => {
+    const spot_id = req.query['spot_id']
+    const is_occupied = req.query['is_occupied']
+    await smartpark_db.updateStatus(spot_id, is_occupied)
+    res.sendStatus(200)
+})
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
