@@ -10,12 +10,28 @@ app.get('/', (req, res) => {
 
  app.get('/getSpots', async (req, res) => {
     const results = await smartpark_db.getAllSpots()
-    console.log(results)
     res.send(results)
 })
 
-app.get('/getStatus', (req, res) => {
-    
+const SPOT_STATUS = Object.freeze({
+    OPEN: "0",
+    OCCUPIED: "1",
+    RESERVED: "2"
+})
+
+app.get('/getStatus', async (req, res) => {
+    const spot_id = parseInt(req.query['spot_id'])
+    const query_results = (await smartpark_db.getStatus(spot_id))[0]
+    if(query_results['is_reserved']){
+        res.send(SPOT_STATUS.RESERVED)
+    }
+    else if(query_results['is_occupied']){
+        res.send(SPOT_STATUS.OCCUPIED)
+    }
+    else{
+        
+        res.send(SPOT_STATUS.OPEN)
+    }
 })
 
 app.listen(port, () => {
