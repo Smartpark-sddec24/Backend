@@ -1,26 +1,21 @@
 const express = require('express')
-const mysql = require('mysql2')
-require('dotenv').config()
+const smartpark_db = require('./database/smartpark_db')
 
 const app = express()
 const port = 5000
-
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB
-})
-
 
 app.get('/', (req, res) => {
     res.send("your stupid")
 })
 
-app.get('/getSpots', (req, res) => {
-    connection.query( "SELECT * FROM Spots", (error, results, fields) => {
-        console.log(results)
-    });
+ app.get('/getSpots', async (req, res) => {
+    const results = await smartpark_db.getAllSpots()
+    console.log(results)
+    res.send(results)
+})
+
+app.get('/getStatus', (req, res) => {
+    
 })
 
 app.listen(port, () => {
