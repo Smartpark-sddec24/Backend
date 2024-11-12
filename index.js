@@ -1,5 +1,5 @@
 const express = require('express')
-const smartpark_db = require('./database/smartpark_db')
+const smartpark_db = require('./database/smartpark_db');
 
 const app = express()
 const port = process.env.PORT
@@ -33,6 +33,21 @@ app.get('/getStatus', async (req, res) => {
         res.send(SPOT_STATUS.OPEN)
     }
 })
+
+app.get('/getOneOpen', async (req, res) => {
+    try {
+        const openSpot = (await smartpark_db.getOneOpen())[0];
+        
+        if (openSpot) {
+            res.send(openSpot);
+        } else {
+            res.send("");
+        }
+    } catch (error) {
+        console.error("Error fetching an open spot:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
 
 app.post('/updateSpot', async (req, res) => {
     const spot_id = req.query['spot_id']
