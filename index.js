@@ -1,26 +1,37 @@
 const express = require('express')
-const mysql = require('mysql2')
-require('dotenv').config()
+const smartpark_db = require('./database/smartpark_db')
 
 const app = express()
 const port = process.env.PORT
-
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB
-})
-
 
 app.get('/', (req, res) => {
     res.send("your stupid")
 })
 
-app.get('/getSpots', (req, res) => {
-    connection.query( "SELECT * FROM Spots", (error, results, fields) => {
-        console.log(results)
-    });
+ app.get('/getSpots', async (req, res) => {
+    const results = await smartpark_db.getAllSpots()
+    res.send(results)
+})
+
+const SPOT_STATUS = Object.freeze({
+    OPEN: "0",
+    OCCUPIED: "1",
+    RESERVED: "2"
+})
+
+app.get('/getStatus', async (req, res) => {
+    const spot_id = parseInt(req.query['spot_id'])
+    const query_results = (await smartpark_db.getStatus(spot_id))[0]
+    if(query_results['is_reserved']){
+        res.send(SPOT_STATUS.RESERVED)
+    }
+    else if(query_results['is_occupied']){
+        res.send(SPOT_STATUS.OCCUPIED)
+    }
+    else{
+        
+        res.send(SPOT_STATUS.OPEN)
+    }
 })
 
 app.listen(port, () => {
