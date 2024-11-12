@@ -34,6 +34,10 @@ app.get('/getStatus', async (req, res) => {
     }
 })
 
+app.get('/getLocations', async (req, res) => {
+    
+})
+
 app.post('/updateSpot', async (req, res) => {
     const spot_id = req.query['spot_id']
     const is_occupied = req.query['is_occupied']
