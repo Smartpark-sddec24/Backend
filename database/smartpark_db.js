@@ -29,6 +29,14 @@ async function getStatus(spot_id) {
     )
 }
 
+async function getOneOpen() {
+    return query(
+        `SELECT * FROM spots
+        WHERE is_reserved = 0 AND is_occupied = 0
+        LIMIT 1`
+    );
+}
+
 async function updateStatus(spot_id, is_occupied) {
     return query(
         `UPDATE spots
@@ -48,5 +56,6 @@ module.exports = {
     getAllSpots,
     getStatus,
     updateStatus,
-    getLocations
+    getLocations,
+    getOneOpen,
 }
