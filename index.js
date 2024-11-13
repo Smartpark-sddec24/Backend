@@ -35,7 +35,8 @@ app.get('/getStatus', async (req, res) => {
 })
 
 app.get('/getLocations', async (req, res) => {
-    
+    const locations = await smartpark_db.getLocations()
+    res.send(locations)
 })
 
 app.post('/updateSpot', async (req, res) => {
