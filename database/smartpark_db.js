@@ -46,9 +46,16 @@ async function updateStatus(spot_id, is_occupied) {
     )
 }
 
+async function getLocations() {
+    return query(
+        `SELECT *
+        FROM locations`
+    )
+}
 module.exports = {
     getAllSpots,
     getStatus,
+    updateStatus,
+    getLocations,
     getOneOpen,
-    updateStatus
 }

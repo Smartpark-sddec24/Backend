@@ -34,6 +34,11 @@ app.get('/getStatus', async (req, res) => {
     }
 })
 
+app.get('/getLocations', async (req, res) => {
+    const locations = await smartpark_db.getLocations()
+    res.send(locations)
+})
+
 app.get('/getOneOpen', async (req, res) => {
     try {
         const openSpot = (await smartpark_db.getOneOpen())[0];
