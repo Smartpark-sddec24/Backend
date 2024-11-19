@@ -17,31 +17,36 @@ function query(query_string, query_params) {
 }
 
 async function getAllSpots() {
-    return query('SELECT * FROM spots', []);
+    return query('SELECT * FROM spots_status', []);
 }
 
 async function getStatus(spot_id) {
     return query(
         `SELECT spot_id, is_reserved, is_occupied
-        FROM spots
+        FROM spots_status
         WHERE spot_id = ?`,
         [spot_id]
     )
 }
 
-async function getOneOpen() {
+async function getOneOpen(location_id) {
     return query(
-        `SELECT * FROM spots
-        WHERE is_reserved = 0 AND is_occupied = 0
-        LIMIT 1`
+        `SELECT * 
+        FROM spots_status
+        JOIN boards ON boards.board_id = spots_status.board_id
+        WHERE is_reserved = 0 
+        AND is_occupied = 0 
+        AND location_id = ?
+        LIMIT 1`,
+        [location_id]
     );
 }
 
 async function getTotalSpots(location_id) {
     return query(
         `SELECT COUNT(*) AS totalSpot
-        FROM spots
-        JOIN boards ON spots.board_id = boards.board_id
+        FROM spots_status
+        JOIN boards ON spots_status.board_id = boards.board_id
         JOIN locations ON locations.location_id = boards.location_id
         WHERE locations.location_id = ?`,
         [location_id]
@@ -51,10 +56,10 @@ async function getTotalSpots(location_id) {
 async function getAvailableSpots(location_id) {
     return query(
         `SELECT COUNT(*) AS availableSpot
-        FROM spots
-        JOIN boards ON spots.board_id = boards.board_id
+        FROM spots_status
+        JOIN boards ON spots_status.board_id = boards.board_id
         JOIN locations ON locations.location_id = boards.location_id
-        WHERE locations.location_id = ? AND spots.is_occupied = 0 AND spots.is_reserved = 0`,
+        WHERE locations.location_id = ? AND spots_status.is_occupied = 0 AND spots_status.is_reserved = 0`,
         [location_id]
     );
 }
@@ -68,12 +73,33 @@ async function updateStatus(spot_id, is_occupied) {
     )
 }
 
+async function reserveSpot(spot_id) {
+    return query(
+        `
+        INSERT INTO reservations (spot_id)
+        VALUES (?);
+        `,
+        [spot_id]
+    )
+}
+
+async function getSpot(spot_id) {
+    return query(
+        `SELECT *
+        FROM spots_status
+        JOIN boards ON boards.board_id = spots_status.board_id
+        WHERE spot_id = ?`,
+        [spot_id]
+    )
+}
+
 async function getLocations() {
     return query(
         `SELECT *
         FROM locations`
     )
 }
+
 module.exports = {
     getAllSpots,
     getStatus,
@@ -81,5 +107,7 @@ module.exports = {
     getLocations,
     getOneOpen,
     getTotalSpots,
-    getAvailableSpots
+    getAvailableSpots,
+    getSpot,
+    reserveSpot
 }
