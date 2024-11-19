@@ -37,6 +37,28 @@ async function getOneOpen() {
     );
 }
 
+async function getTotalSpots(location_id) {
+    return query(
+        `SELECT COUNT(*) AS totalSpot
+        FROM spots
+        JOIN boards ON spots.board_id = boards.board_id
+        JOIN locations ON locations.location_id = boards.location_id
+        WHERE locations.location_id = ?`,
+        [location_id]
+    );
+}
+
+async function getAvailableSpots(location_id) {
+    return query(
+        `SELECT COUNT(*) AS availableSpot
+        FROM spots
+        JOIN boards ON spots.board_id = boards.board_id
+        JOIN locations ON locations.location_id = boards.location_id
+        WHERE locations.location_id = ? AND spots.is_occupied = 0 AND spots.is_reserved = 0`,
+        [location_id]
+    );
+}
+
 async function updateStatus(spot_id, is_occupied) {
     return query(
         `UPDATE spots
@@ -58,4 +80,6 @@ module.exports = {
     updateStatus,
     getLocations,
     getOneOpen,
+    getTotalSpots,
+    getAvailableSpots
 }

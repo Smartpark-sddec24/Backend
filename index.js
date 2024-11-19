@@ -54,6 +54,27 @@ app.get('/getOneOpen', async (req, res) => {
     }
 });
 
+app.get('/getAvailableSpots', async (req, res) => {
+    const location_id = parseInt(req.query.location_id);
+
+    if (isNaN(location_id)) {
+        return res.status(400).send("Invalid location_id");
+    }
+
+    try {
+        const result1 = await smartpark_db.getTotalSpots(location_id)
+        const result2 = await smartpark_db.getAvailableSpots(location_id)
+        
+        res.send({
+            totalSpot: result1[0].totalSpot,
+            availableSpot: result2[0].availableSpot
+        });
+    } catch (error) {
+        console.error("Error fetching available spots:", error)
+        res.status(500).send("Internal Server Error")
+    }
+});
+
 app.post('/updateSpot', async (req, res) => {
     const spot_id = req.query['spot_id']
     const is_occupied = req.query['is_occupied']
