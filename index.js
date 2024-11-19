@@ -1,5 +1,6 @@
 const express = require('express')
 const smartpark_db = require('./database/smartpark_db');
+const stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
 
 const app = express()
 const port = process.env.PORT
@@ -40,8 +41,9 @@ app.get('/getLocations', async (req, res) => {
 })
 
 app.get('/getOneOpen', async (req, res) => {
+    const location_id = req.query.location_id
     try {
-        const openSpot = (await smartpark_db.getOneOpen())[0];
+        const openSpot = (await smartpark_db.getOneOpen(location_id))[0];
         
         if (openSpot) {
             res.send(openSpot);
@@ -80,6 +82,47 @@ app.post('/updateSpot', async (req, res) => {
     const is_occupied = req.query['is_occupied']
     await smartpark_db.updateStatus(spot_id, is_occupied)
     res.sendStatus(200)
+})
+
+function is_open(spot){
+    if(spot['is_reserved'] | spot['is_occupied']){
+        return false;
+    } else {
+        return true;
+    }
+}
+
+async function handle_payment(spot, res){
+    try {
+        var args = {
+          amount: 1099,
+          currency: 'usd',
+          // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+          automatic_payment_methods: {enabled: true},
+        };
+        const intent = await stripe.paymentIntents.create(args);
+        res.json({
+          client_secret: intent.client_secret,
+        });
+        await smartpark_db.reserveSpot(spot.spot_id);
+      } catch (err) {
+        res.status(err.statusCode).json({ error: err.message })
+      }
+}
+
+app.post('/reserve', async(req, res) => {
+    const spot_id = req.query.spot_id
+    //check if the spot is still open
+    let this_spot = (await smartpark_db.getSpot(spot_id))[0]
+    while(this_spot != null){
+        if(is_open(this_spot)){
+            await handle_payment(this_spot, res)
+            return;
+        } else {
+            this_spot = (await smartpark_db.getOneOpen(this_spot.location_id))[0];
+        }
+    }
+    res.send("no open spots")
 })
 
 app.listen(port, () => {
