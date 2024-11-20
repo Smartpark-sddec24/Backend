@@ -80,8 +80,13 @@ app.get('/getAvailableSpots', async (req, res) => {
 app.post('/updateSpot', async (req, res) => {
     const spot_id = req.query['spot_id']
     const is_occupied = req.query['is_occupied']
-    await smartpark_db.updateStatus(spot_id, is_occupied)
-    res.sendStatus(200)
+    let query_out = (await smartpark_db.updateStatus(spot_id, is_occupied))[1][0]
+    if(is_occupied){
+        console.log("Spot ", spot_id, " is now occupied")
+    } else {
+        console.log("Spot ", spot_id, " is now unoccupied")
+    }
+    res.send(query_out.is_reserved.toString());
 })
 
 function is_open(spot){

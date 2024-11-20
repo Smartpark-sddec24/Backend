@@ -68,8 +68,12 @@ async function updateStatus(spot_id, is_occupied) {
     return query(
         `UPDATE spots
         SET is_occupied = ?
+        WHERE spot_id = ?;
+        
+        SELECT is_reserved
+        FROM spots_status
         WHERE spot_id = ?`,
-        [is_occupied, spot_id]
+        [is_occupied, spot_id, spot_id]
     )
 }
 
