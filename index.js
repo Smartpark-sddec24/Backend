@@ -14,6 +14,32 @@ app.get('/', (req, res) => {
     res.send(results)
 })
 
+app.get('/initialize', async (req, res) => {
+    try{
+        const mac_addr = req.query['mac_address'];
+        let board_spots = await smartpark_db.getBoardSpots(mac_addr)
+
+        if(board_spots.length == 0){
+            console.log("spots not found");
+            await smartpark_db.initialize(mac_addr)
+            for(let i = 0; i < 4; i++){
+                console.log("adding spot ", i)
+                await smartpark_db.createSpot(mac_addr)
+            }
+            board_spots = await smartpark_db.getBoardSpots(mac_addr)
+        }
+        res.send([
+            board_spots[0].spot_id,
+            board_spots[1].spot_id,
+            board_spots[2].spot_id,
+            board_spots[3].spot_id
+        ])
+    } catch (err){
+        res.send(err)
+    }
+    
+})
+
 const SPOT_STATUS = Object.freeze({
     OPEN: "0",
     OCCUPIED: "1",
@@ -58,7 +84,7 @@ app.get('/getOneOpen', async (req, res) => {
 
 app.get('/getAvailableSpots', async (req, res) => {
     const location_id = parseInt(req.query.location_id);
-
+    
     if (isNaN(location_id)) {
         return res.status(400).send("Invalid location_id");
     }
@@ -78,15 +104,19 @@ app.get('/getAvailableSpots', async (req, res) => {
 });
 
 app.post('/updateSpot', async (req, res) => {
-    const spot_id = req.query['spot_id']
-    const is_occupied = req.query['is_occupied']
-    let query_out = (await smartpark_db.updateStatus(spot_id, is_occupied))[1][0]
-    if(is_occupied){
-        console.log("Spot ", spot_id, " is now occupied")
-    } else {
-        console.log("Spot ", spot_id, " is now unoccupied")
+    try{
+        const spot_id = req.query['spot_id']
+        const is_occupied = req.query['is_occupied']
+        let query_out = (await smartpark_db.updateStatus(spot_id, is_occupied))[1][0]
+        if(is_occupied){
+            console.log("Spot ", spot_id, " is now occupied")
+        } else {
+            console.log("Spot ", spot_id, " is now unoccupied")
+        }
+        res.send(query_out.is_reserved.toString());
+    } catch (err) {
+        res.send(err)
     }
-    res.send(query_out.is_reserved.toString());
 })
 
 function is_open(spot){
@@ -131,5 +161,5 @@ app.post('/reserve', async(req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`SmartPark server listening on port ${port}`)
 })
