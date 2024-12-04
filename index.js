@@ -108,7 +108,7 @@ app.post('/updateSpot', async (req, res) => {
         const spot_id = req.query['spot_id']
         const is_occupied = req.query['is_occupied']
         let query_out = (await smartpark_db.updateStatus(spot_id, is_occupied))[1][0]
-        if(is_occupied){
+        if(is_occupied == 1){
             console.log("Spot ", spot_id, " is now occupied")
         } else {
             console.log("Spot ", spot_id, " is now unoccupied")

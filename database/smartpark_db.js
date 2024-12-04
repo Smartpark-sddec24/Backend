@@ -33,7 +33,7 @@ async function getOneOpen(location_id) {
     return query(
         `SELECT * 
         FROM spots_status
-        JOIN boards ON board.board_mac_address = spots_status.board_mac_address
+        JOIN boards ON boards.board_mac_address = spots_status.board_mac_address
         WHERE is_reserved = 0 
         AND is_occupied = 0 
         AND location_id = ?
