@@ -1,9 +1,15 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const smartpark_db = require('./database/smartpark_db');
 const stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
+const { networkInterfaces } = require('os');
+const { ok } = require('assert');
 
 const app = express()
 const port = process.env.PORT
+const nets = networkInterfaces()
+
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
     res.send("your stupid")
@@ -17,11 +23,12 @@ app.get('/', (req, res) => {
 app.get('/initialize', async (req, res) => {
     try{
         const mac_addr = req.query['mac_address'];
+        const location_id = 2;
         let board_spots = await smartpark_db.getBoardSpots(mac_addr)
 
         if(board_spots.length == 0){
             console.log("spots not found");
-            await smartpark_db.initialize(mac_addr)
+            await smartpark_db.initialize(mac_addr, location_id)
             for(let i = 0; i < 4; i++){
                 console.log("adding spot ", i)
                 await smartpark_db.createSpot(mac_addr)
@@ -104,18 +111,23 @@ app.get('/getAvailableSpots', async (req, res) => {
 });
 
 app.post('/updateSpot', async (req, res) => {
+    console.log(req.body[0])
     try{
-        const spot_id = req.query['spot_id']
-        const is_occupied = req.query['is_occupied']
-        let query_out = (await smartpark_db.updateStatus(spot_id, is_occupied))[1][0]
-        if(is_occupied == 1){
-            console.log("Spot ", spot_id, " is now occupied")
-        } else {
-            console.log("Spot ", spot_id, " is now unoccupied")
+        let index = 0;
+        let query_out = [];
+        for(spot of req.body)
+        {
+            if(spot.is_occupied == 1){
+                console.log("Spot ", spot.spot_id, " is now occupied")
+            } else {
+                console.log("Spot ", spot.spot_id, " is now unoccupied")
+            }
+            query_out[index] = (await smartpark_db.updateStatus(spot.spot_id, spot.is_occupied))[1][0].is_reserved;
+            index++;
         }
-        res.send(query_out.is_reserved.toString());
+        res.send(query_out);
     } catch (err) {
-        res.send(err)
+        throw err;
     }
 })
 
@@ -161,5 +173,6 @@ app.post('/reserve', async(req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`SmartPark server listening on port ${port}`)
+    ip = nets['wlp3s0'][0]['address']
+    console.log(`SmartPark server listening on port at http://${ip}:${port}`)
 })
