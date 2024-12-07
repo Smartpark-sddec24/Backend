@@ -108,13 +108,12 @@ app.get('/getAvailableSpots', async (req, res) => {
         console.error("Error fetching available spots:", error)
         res.status(500).send("Internal Server Error")
     }
-});
+});j
 
 app.post('/updateSpot', async (req, res) => {
-    console.log(req.body[0])
     try{
         let index = 0;
-        let query_out = [];
+        let is_reserved_arr = [];
         for(spot of req.body)
         {
             if(spot.is_occupied == 1){
@@ -122,10 +121,10 @@ app.post('/updateSpot', async (req, res) => {
             } else {
                 console.log("Spot ", spot.spot_id, " is now unoccupied")
             }
-            query_out[index] = (await smartpark_db.updateStatus(spot.spot_id, spot.is_occupied))[1][0].is_reserved;
+            is_reserved_arr[index] = (await smartpark_db.updateStatus(spot.spot_id, spot.is_occupied))[1][0].is_reserved;
             index++;
         }
-        res.send(query_out);
+        res.send(is_reserved_arr);
     } catch (err) {
         throw err;
     }
@@ -159,7 +158,6 @@ async function handle_payment(spot, res){
 
 app.post('/reserve', async(req, res) => {
     const spot_id = req.query.spot_id
-    //check if the spot is still open
     let this_spot = (await smartpark_db.getSpot(spot_id))[0]
     while(this_spot != null){
         if(is_open(this_spot)){
