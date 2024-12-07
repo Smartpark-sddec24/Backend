@@ -15,7 +15,7 @@ CREATE TABLE smartpark.locations (
 
 -- Create the 'boards' table
 CREATE TABLE smartpark.boards (
-    board_id INT NOT NULL PRIMARY KEY,
+    board_mac_address VARCHAR(20) NOT NULL PRIMARY KEY,
     location_id INT NOT NULL,
     last_ping DATETIME,
     FOREIGN KEY (location_id) REFERENCES locations(location_id)
@@ -23,12 +23,12 @@ CREATE TABLE smartpark.boards (
 
 -- Create the 'spots' table
 CREATE TABLE smartpark.spots (
-    spot_id INT NOT NULL PRIMARY KEY,
+    spot_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     is_occupied BOOLEAN DEFAULT FALSE,
-    board_id INT NOT NULL,
+    board_mac_address VARCHAR(20) NOT NULL,
     spot_name VARCHAR(3),
     spot_price INT,
-    FOREIGN KEY (board_id) REFERENCES boards(board_id)
+    FOREIGN KEY (board_mac_address) REFERENCES boards(board_mac_address)
 );
 
 -- Create the 'reservation' table
@@ -36,7 +36,7 @@ CREATE TABLE smartpark.reservations (
     reserve_id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
     spot_id INT NOT NULL,
     start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
-    end_time DATETIME DEFAULT (ADDDATE(CURRENT_TIMESTAMP, INTERVAL 2 MINUTE)),
+    end_time DATETIME DEFAULT (ADDDATE(CURRENT_TIMESTAMP, INTERVAL 5 MINUTE)),
     license_plate VARCHAR(15),
     license_state VARCHAR(2),
     reserved_by VARCHAR(255),
