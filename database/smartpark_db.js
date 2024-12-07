@@ -104,13 +104,13 @@ async function getLocations() {
     )
 }
 
-async function initialize(mac_address) {
+async function initialize(mac_address, location_id) {
     return query(
         `
         INSERT INTO boards (board_mac_address, location_id, last_ping)
-        VALUES (?, 1, current_timestamp())
+        VALUES (?, ?, current_timestamp())
         `,
-        [mac_address]
+        [mac_address, location_id]
     )
 }
 
