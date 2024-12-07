@@ -5,14 +5,14 @@ function query(query_string, query_params) {
     return new Promise((resolve, reject) => {
         connection.query(
             query_string,
-            query_params, 
+            query_params,
             (err, rows) => {
-                if(err){
+                if (err) {
                     reject(err);
                 } else {
                     resolve(rows);
                 }
-        })
+            })
     })
 }
 
